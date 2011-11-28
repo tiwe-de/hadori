@@ -1,0 +1,21 @@
+Source: hadori
+Section: utils
+Priority: extra
+Maintainer: Timo Weingärtner <timo@tiwe.de>
+Build-Depends: debhelper (>= 8.9.0), libboost-program-options-dev, zlib1g-dev
+Standards-Version: 3.9.2
+
+Package: hadori
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Hardlinks identical files
+ This might look like yet another hardlinking tool, but it is the only one
+ which only memorizes one filename per inode. That results in less merory
+ consumption and faster execution compared to its alternatives. Therefore
+ (and because all the other names are already taken) it's called
+ "HArdlinking DOne RIght".
+ .
+ Advantages over other hardlinking tools:
+  * predictability: arguments are scanned in order, each first version is kept
+  * much lower CPU and memory consumption
+  * hashing option: speedup on many equal-sized, mostly identical files
