@@ -56,6 +56,8 @@ void handle_file(std::string const & path, struct stat const & s) {
 		inode const & target = kept.find(to_link[s.st_ino])->second;
 		debug << "another link to inode " << s.st_ino << " that we merge with " << target << std::endl;
 		do_link(target, path);
+		if (s.st_nlink == 1)
+			to_link.erase(s.st_ino);
 		return;
 	}
 	inode f(path, s);
@@ -78,7 +80,8 @@ void handle_file(std::string const & path, struct stat const & s) {
 		if (!compare(candidate, f))
 			continue;
 		verbose << "linking " << candidate << " to " << path << std::endl;
-		to_link.insert(std::make_pair(s.st_ino, it->second));
+		if (s.st_nlink > 1)
+			to_link.insert(std::make_pair(s.st_ino, it->second));
 		if (not config.count("dry-run"))
 			do_link(candidate, path);
 		return;
