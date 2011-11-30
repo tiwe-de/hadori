@@ -168,7 +168,7 @@ int main (int const argc, char ** argv) {
 	po::options_description all_opts;
 	all_opts.add(opts);
 	all_opts.add_options()
-		("args",	po::value< std::vector<std::string> >(), "files and directories to work on")
+		("args",	po::value<std::vector<std::string>>(), "files and directories to work on")
 		;
 	po::positional_options_description pos_opts;
 	pos_opts.add("args", -1);
@@ -192,7 +192,7 @@ int main (int const argc, char ** argv) {
 			error << "--stdin combined with commandline arguments, this is not supported." << std::endl;
 			return EX_USAGE;
 		}
-		for(std::string const & dir : config["args"].as< std::vector<std::string> >())
+		for(auto const & dir : config["args"].as<std::vector<std::string>>())
 			recurse_start(dir);
 	} else {
 		if (not config.count("stdin") and not config.count("null"))
