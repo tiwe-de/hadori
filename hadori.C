@@ -19,6 +19,16 @@ namespace po = boost::program_options;
 
 #include "inode.h"
 
+// needed for equal_range and range-for
+namespace std {
+template<typename T> T& begin(pair<T,T> & ip) {
+	return ip.first;
+}
+template<typename T> T& end(pair<T,T> & ip) {
+	return ip.second;
+}
+}
+
 po::variables_map config;
 std::ostream debug(std::clog.rdbuf()), verbose(std::clog.rdbuf()), error(std::clog.rdbuf());
 
@@ -64,8 +74,8 @@ void handle_file(std::string const & path, struct stat const & s) {
 	}
 	inode f(path, s);
 	debug << f << " is new to us" << std::endl;
-	for (auto it = sizes.lower_bound(s.st_size); it != sizes.upper_bound(s.st_size); ++it) {
-		inode const & candidate = kept.find(it->second)->second;
+	for (auto const & it : sizes.equal_range(s.st_size)) {
+		inode const & candidate = kept.find(it.second)->second;
 		debug << "looking if it matches " << candidate << std::endl;
 		if (candidate.stat.st_mode != s.st_mode)
 			continue;
@@ -83,7 +93,7 @@ void handle_file(std::string const & path, struct stat const & s) {
 			continue;
 		verbose << "linking " << candidate << " to " << path << std::endl;
 		if (s.st_nlink > 1)
-			to_link.insert(std::make_pair(s.st_ino, it->second));
+			to_link.insert(std::make_pair(s.st_ino, it.second));
 		if (not config.count("dry-run"))
 			do_link(candidate, path);
 		return;
