@@ -18,9 +18,6 @@ namespace po = boost::program_options;
 
 #include "inode.h"
 
-std::map<ino_t, inode const> kept;
-std::map<ino_t, ino_t> to_link;
-std::multimap<off_t, ino_t> sizes;
 po::variables_map config;
 std::ostream debug(std::clog.rdbuf()), verbose(std::clog.rdbuf()), error(std::clog.rdbuf());
 
@@ -47,6 +44,10 @@ void do_link (inode const & i, std::string const & other) {
 }
 
 void handle_file(std::string const & path, struct stat const & s) {
+	static std::map<ino_t, inode const> kept;
+	static std::map<ino_t, ino_t> to_link;
+	static std::multimap<off_t, ino_t> sizes;
+	
 	debug << "examining " << path << std::endl;
 	if (kept.count(s.st_ino)) {
 		debug << "another link to inode " << s.st_ino << " that we keep" << std::endl;
