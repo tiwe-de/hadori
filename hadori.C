@@ -4,7 +4,6 @@ namespace po = boost::program_options;
 #include <string>
 #include <vector>
 #include <queue>
-#include <map>
 #include <unordered_map>
 #include <iostream>
 #include <sstream>
@@ -57,7 +56,7 @@ void do_link (inode const & i, std::string const & other) {
 void handle_file(std::string const & path, struct stat const & s) {
 	static std::unordered_map<ino_t, inode const> kept;
 	static std::unordered_map<ino_t, ino_t> to_link;
-	static std::multimap<off_t, ino_t> sizes;
+	static std::unordered_multimap<off_t, ino_t> sizes;
 	
 	debug << "examining " << path << std::endl;
 	if (kept.count(s.st_ino)) {
