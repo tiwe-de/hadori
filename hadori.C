@@ -173,7 +173,7 @@ int main (int const argc, char ** argv) {
 		("dry-run,n",	"don't change anything, implies --verbose")
 		("verbose,v",	"show which files get linked")
 		("debug,d",	"show files being examined")
-		("stdin,s",	"read arguments from stdin, one per line")
+		("stdin,s",	"read arguments from stdin, one per line; you can't combine that with arguments on the commandline")
 		("null,0",	"implies --stdin, but use null bytes as delimiter")
 		;
 	po::options_description all_opts;
