@@ -206,9 +206,9 @@ int main (int const argc, char ** argv) {
 	po::notify(config);
 	
 	if (config.count("help")) {
-		error << "Invocation: hadori [ OPTIONS ] [ ARGUMENTS ]" << std::endl;
-		error << opts << std::endl;
-		return EX_USAGE;
+		std::cout << "Invocation: hadori [ OPTIONS ] [ ARGUMENTS ]" << std::endl;
+		std::cout << opts << std::endl;
+		return EX_OK;
 	}
 	
 	if (not config.count("debug"))

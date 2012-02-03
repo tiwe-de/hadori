@@ -23,7 +23,7 @@ CPPFLAGS+=-D_FILE_OFFSET_BITS=64
 all: hadori
 
 hadori.1: hadori
-	help2man -n $< -o $@ -N --no-discard-stderr --version-string 0.1 ./$<
+	help2man -n $< -o $@ -N --version-string 0.1 ./$<
 
 hadori: hadori.o
 hadori.o: hadori.C inode.h
