@@ -20,13 +20,18 @@ CXXFLAGS?=-O2 -Wall
 CXXFLAGS+=-std=c++0x
 CPPFLAGS+=-D_FILE_OFFSET_BITS=64
 
-all: hadori
+all: hadori.1
 
 hadori.1: hadori
-	help2man -n $< -o $@ -N --version-string 0.1 ./$<
+	help2man -n $< -o $@ -N ./$<
 
 hadori: hadori.o
-hadori.o: hadori.C inode.h
+hadori.o: hadori.C inode.h version.h
+
+version.h:
+	test -d .git && git describe | sed 's/^\(.*\)$$/#define HADORI_VERSION "hadori \1"/' > $@
 
 clean:
-	rm -f hadori hadori.o
+	rm -f hadori hadori.o hadori.1
+
+.PHONY: version.h clean

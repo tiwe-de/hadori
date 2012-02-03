@@ -36,6 +36,7 @@ namespace po = boost::program_options;
 #include <sysexits.h>
 
 #include "inode.h"
+#include "version.h"
 
 // needed for equal_range and range-for
 namespace std {
@@ -187,6 +188,7 @@ int main (int const argc, char ** argv) {
 	po::options_description opts("OPTIONS");
 	opts.add_options()
 		("help,h",	"print this help message")
+		("version,V",	"print version information")
 		("no-time,t",	"ignore mtime")
 		("hash",	"use adler32 hash to speed up comparing many files with same size and mostly identical content")
 		("dry-run,n",	"don't change anything, implies --verbose")
@@ -208,6 +210,11 @@ int main (int const argc, char ** argv) {
 	if (config.count("help")) {
 		std::cout << "Invocation: hadori [ OPTIONS ] [ ARGUMENTS ]" << std::endl;
 		std::cout << opts << std::endl;
+		return EX_OK;
+	}
+	
+	if (config.count("version")) {
+		std::cout << HADORI_VERSION << std::endl;
 		return EX_OK;
 	}
 	
