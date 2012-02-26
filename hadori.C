@@ -1,10 +1,29 @@
+/*
+ * Copyright (C) 2011 Timo Weingärtner <timo@tiwe.de>
+ *
+ * This file is part of hadori.
+ *
+ * hadori is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Foobar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with hadori.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
 #include <string>
 #include <vector>
 #include <queue>
-#include <map>
+#include <unordered_map>
 #include <iostream>
 #include <sstream>
 
@@ -17,10 +36,18 @@ namespace po = boost::program_options;
 #include <sysexits.h>
 
 #include "inode.h"
+#include "version.h"
 
-std::map<ino_t, inode const> kept;
-std::map<ino_t, ino_t> to_link;
-std::multimap<off_t, ino_t> sizes;
+// needed for equal_range and range-for
+namespace std {
+template<typename T> T& begin(pair<T,T> & ip) {
+	return ip.first;
+}
+template<typename T> T& end(pair<T,T> & ip) {
+	return ip.second;
+}
+}
+
 po::variables_map config;
 std::ostream debug(std::clog.rdbuf()), verbose(std::clog.rdbuf()), error(std::clog.rdbuf());
 
@@ -47,6 +74,10 @@ void do_link (inode const & i, std::string const & other) {
 }
 
 void handle_file(std::string const & path, struct stat const & s) {
+	static std::unordered_map<ino_t, inode const> kept;
+	static std::unordered_map<ino_t, ino_t> to_link;
+	static std::unordered_multimap<off_t, ino_t> sizes;
+	
 	debug << "examining " << path << std::endl;
 	if (kept.count(s.st_ino)) {
 		debug << "another link to inode " << s.st_ino << " that we keep" << std::endl;
@@ -56,12 +87,14 @@ void handle_file(std::string const & path, struct stat const & s) {
 		inode const & target = kept.find(to_link[s.st_ino])->second;
 		debug << "another link to inode " << s.st_ino << " that we merge with " << target << std::endl;
 		do_link(target, path);
+		if (s.st_nlink == 1)
+			to_link.erase(s.st_ino);
 		return;
 	}
 	inode f(path, s);
 	debug << f << " is new to us" << std::endl;
-	for (auto it = sizes.lower_bound(s.st_size); it != sizes.upper_bound(s.st_size); ++it) {
-		inode const & candidate = kept.find(it->second)->second;
+	for (auto const & it : sizes.equal_range(s.st_size)) {
+		inode const & candidate = kept.find(it.second)->second;
 		debug << "looking if it matches " << candidate << std::endl;
 		if (candidate.stat.st_mode != s.st_mode)
 			continue;
@@ -78,7 +111,8 @@ void handle_file(std::string const & path, struct stat const & s) {
 		if (!compare(candidate, f))
 			continue;
 		verbose << "linking " << candidate << " to " << path << std::endl;
-		to_link.insert(std::make_pair(s.st_ino, it->second));
+		if (s.st_nlink > 1)
+			to_link.insert(std::make_pair(s.st_ino, it.second));
 		if (not config.count("dry-run"))
 			do_link(candidate, path);
 		return;
@@ -154,18 +188,19 @@ int main (int const argc, char ** argv) {
 	po::options_description opts("OPTIONS");
 	opts.add_options()
 		("help,h",	"print this help message")
+		("version,V",	"print version information")
 		("no-time,t",	"ignore mtime")
 		("hash",	"use adler32 hash to speed up comparing many files with same size and mostly identical content")
 		("dry-run,n",	"don't change anything, implies --verbose")
 		("verbose,v",	"show which files get linked")
 		("debug,d",	"show files being examined")
-		("stdin,s",	"read arguments from stdin, one per line")
+		("stdin,s",	"read arguments from stdin, one per line; you can't combine that with arguments on the commandline")
 		("null,0",	"implies --stdin, but use null bytes as delimiter")
 		;
 	po::options_description all_opts;
 	all_opts.add(opts);
 	all_opts.add_options()
-		("args",	po::value< std::vector<std::string> >(), "files and directories to work on")
+		("args",	po::value<std::vector<std::string>>(), "files and directories to work on")
 		;
 	po::positional_options_description pos_opts;
 	pos_opts.add("args", -1);
@@ -173,9 +208,14 @@ int main (int const argc, char ** argv) {
 	po::notify(config);
 	
 	if (config.count("help")) {
-		error << "Invocation: hadori [ OPTIONS ] [ ARGUMENTS ]" << std::endl;
-		error << opts << std::endl;
-		return EX_USAGE;
+		std::cout << "Invocation: hadori [ OPTIONS ] [ ARGUMENTS ]" << std::endl;
+		std::cout << opts << std::endl;
+		return EX_OK;
+	}
+	
+	if (config.count("version")) {
+		std::cout << HADORI_VERSION << std::endl;
+		return EX_OK;
 	}
 	
 	if (not config.count("debug"))
@@ -189,7 +229,7 @@ int main (int const argc, char ** argv) {
 			error << "--stdin combined with commandline arguments, this is not supported." << std::endl;
 			return EX_USAGE;
 		}
-		for(std::string const & dir : config["args"].as< std::vector<std::string> >())
+		for(auto const & dir : config["args"].as<std::vector<std::string>>())
 			recurse_start(dir);
 	} else {
 		if (not config.count("stdin") and not config.count("null"))

@@ -1,5 +1,5 @@
 TODO/possible optimizations
 ===========================
 
-* forget inode in to_link if link count is 1 before linking
 * more debug output when attributes mismatch in handle_file()
+* perhaps use hash_map, hash_multimap for better performance?
