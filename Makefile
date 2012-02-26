@@ -29,7 +29,7 @@ hadori: hadori.o
 hadori.o: hadori.C inode.h version.h
 
 version.h:
-	test -d .git && git describe | sed 's/^\(.*\)$$/#define HADORI_VERSION "hadori \1"/' > $@
+	test ! -d .git || git describe | sed 's/^\(.*\)$$/#define HADORI_VERSION "hadori \1"/' > $@
 
 clean:
 	rm -f hadori hadori.o hadori.1
