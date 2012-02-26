@@ -3,7 +3,7 @@ Section: utils
 Priority: extra
 Maintainer: Timo Weingärtner <timo@tiwe.de>
 Build-Depends: debhelper (>= 8.9.0), libboost-program-options-dev, zlib1g-dev
-Standards-Version: 3.9.2
+Standards-Version: 3.9.3
 
 Package: hadori
 Architecture: any
