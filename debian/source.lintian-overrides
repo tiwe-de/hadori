@@ -1,2 +1,0 @@
-# only need dpkg-buildflags stuff from dh9
-hadori source: package-needs-versioned-debhelper-build-depends 9
