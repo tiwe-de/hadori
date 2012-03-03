@@ -1,3 +1,11 @@
+hadori (0.2-2) unstable; urgency=low
+
+  * Fix typo in gbp.conf
+  * Build-Depend on debhelper 9 now that it's in testing
+  * Upload to debian. Closes: #662080.
+
+ -- Timo Weingärtner <timo@tiwe.de>  Sun, 04 Mar 2012 00:34:24 +0100
+
 hadori (0.2-1) unstable; urgency=low
 
   * New upstream release.
