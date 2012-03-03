@@ -1,5 +1,0 @@
-TODO/possible optimizations
-===========================
-
-* more debug output when attributes mismatch in handle_file()
-* perhaps use hash_map, hash_multimap for better performance?
