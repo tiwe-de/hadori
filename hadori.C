@@ -112,14 +112,14 @@ void handle_file(std::string const & path, struct stat const & s) {
 			continue;
 		verbose << "linking " << candidate << " to " << path << std::endl;
 		if (s.st_nlink > 1)
-			to_link.insert(std::make_pair(s.st_ino, it.second));
+			to_link.insert({s.st_ino, it.second});
 		if (not config.count("dry-run"))
 			do_link(candidate, path);
 		return;
 	}
 	debug << "we keep " << f << std::endl;
-	kept.insert(std::make_pair(s.st_ino, f));
-	sizes.insert(std::make_pair(s.st_size, s.st_ino));
+	kept.insert({s.st_ino, f});
+	sizes.insert({s.st_size, s.st_ino});
 }
 
 void recurse (std::string const & dir, dev_t const dev) {
