@@ -3,9 +3,9 @@ Section: utils
 Priority: extra
 Maintainer: Timo Weingärtner <timo@tiwe.de>
 Build-Depends: debhelper (>= 9), libboost-program-options-dev, zlib1g-dev
-Standards-Version: 3.9.3
+Standards-Version: 3.9.4
 Homepage: https://github.com/tiwe-de/hadori
-Vcs-Git: git://github.com/tiwe-de/hadori.git
+Vcs-Git: git://github.com/tiwe-de/hadori.git -b debian
 Vcs-Browser: https://github.com/tiwe-de/hadori/tree/debian
 
 Package: hadori
