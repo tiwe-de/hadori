@@ -91,7 +91,7 @@ void handle_file(std::string const & path, struct stat const & s) {
 			to_link.erase(s.st_ino);
 		return;
 	}
-	inode f(path, s);
+	inode f{path, s};
 	debug << f << " is new to us" << std::endl;
 	for (auto const & it : sizes.equal_range(s.st_size)) {
 		inode const & candidate = kept.find(it.second)->second;

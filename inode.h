@@ -28,14 +28,7 @@
 struct inode {
 	std::string const filename;
 	struct stat const stat;
-	inode (std::string const &, struct stat const);
-		
-	friend bool compare (inode const &, inode const &);
-	friend std::ostream& operator<< (std::ostream&, inode const &);
 };
-
-inline inode::inode (std::string const & __filename, struct stat const __stat) : filename(__filename), stat(__stat) {
-}
 
 inline bool compare (inode const & l, inode const & r) {
 	char lbuffer[1 << 14];
