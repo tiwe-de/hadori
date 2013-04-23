@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with hadori.  If not, see <http://www.gnu.org/licenses/>.
 
-LDFLAGS+=-lz -lboost_program_options
+LDFLAGS+=-lboost_program_options
 CXXFLAGS?=-O2 -Wall
 CXXFLAGS+=-std=c++0x
 CPPFLAGS+=-D_FILE_OFFSET_BITS=64

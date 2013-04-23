@@ -105,9 +105,6 @@ void handle_file(std::string const & path, struct stat const & s) {
 		if (not config.count("no-time"))
 			if (candidate.stat.st_mtime != s.st_mtime)
 				continue;
-		if (config.count("hash"))
-			if (candidate.get_adler() != f.get_adler())
-				continue;
 		if (!compare(candidate, f))
 			continue;
 		verbose << "linking " << candidate << " to " << path << std::endl;
@@ -190,7 +187,6 @@ int main (int const argc, char ** argv) {
 		("help,h",	"print this help message")
 		("version,V",	"print version information")
 		("no-time,t",	"ignore mtime")
-		("hash",	"use adler32 hash to speed up comparing many files with same size and mostly identical content")
 		("dry-run,n",	"don't change anything, implies --verbose")
 		("verbose,v",	"show which files get linked")
 		("debug,d",	"show files being examined")
