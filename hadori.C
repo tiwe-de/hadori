@@ -115,7 +115,7 @@ void handle_file(std::string const & path, struct stat const & s) {
 		return;
 	}
 	debug << "we keep " << f << std::endl;
-	kept.insert({s.st_ino, f});
+	kept.insert({s.st_ino, std::move(f)});
 	sizes.insert({s.st_size, s.st_ino});
 }
 
