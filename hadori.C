@@ -26,6 +26,7 @@ namespace po = boost::program_options;
 #include <unordered_map>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 #include <cstdlib>
 #include <cstring>
@@ -35,7 +36,6 @@ namespace po = boost::program_options;
 #include <dirent.h>
 #include <sysexits.h>
 
-#include "inode.h"
 #include "version.h"
 
 // needed for equal_range and range-for
@@ -50,6 +50,33 @@ template<typename T> T& end(pair<T,T> & ip) {
 
 po::variables_map config;
 std::ostream debug(std::clog.rdbuf()), verbose(std::clog.rdbuf()), error(std::clog.rdbuf());
+
+struct inode {
+	std::string const filename;
+	struct stat const stat;
+};
+
+inline bool compare (inode const & l, inode const & r) {
+	char lbuffer[1 << 14];
+	char rbuffer[1 << 14];
+	std::ifstream lf(l.filename.c_str());
+	std::ifstream rf(r.filename.c_str());
+	
+	while (not lf.eof()) {
+		lf.read(lbuffer, sizeof(lbuffer));
+		rf.read(rbuffer, sizeof(rbuffer));
+		if (lf.gcount() != rf.gcount())
+			return false;
+		if (memcmp(lbuffer, rbuffer, lf.gcount()))
+			return false;
+	}
+	return true;
+}
+
+inline std::ostream& operator<< (std::ostream& os, inode const & i) {
+	os << "Inode " << i.stat.st_ino << ", represented by " << i.filename;
+	return os;
+}
 
 void do_link (inode const & i, std::string const & other) {
 	if (!link(i.filename.c_str(), other.c_str())) {

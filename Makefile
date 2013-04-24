@@ -26,7 +26,7 @@ hadori.1: hadori
 	help2man -n $< -o $@ -N ./$<
 
 hadori: hadori.o
-hadori.o: hadori.C inode.h version.h
+hadori.o: hadori.C version.h
 
 version.h:
 	test ! -d .git || git describe | sed 's/^\(.*\)$$/#define HADORI_VERSION "hadori \1"/' > $@
