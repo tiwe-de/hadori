@@ -33,5 +33,6 @@ version.h:
 
 clean:
 	rm -f hadori hadori.o hadori.1
+	test ! -d .git || git checkout -f -- version.h
 
 .PHONY: version.h clean
