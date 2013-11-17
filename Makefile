@@ -17,7 +17,7 @@
 
 LDLIBS=-lboost_program_options -lstdc++
 CXXFLAGS?=-O2 -Wall
-CXXFLAGS+=-std=c++0x
+CXXFLAGS+=-std=c++11
 CPPFLAGS+=-D_FILE_OFFSET_BITS=64
 
 all: hadori.1
