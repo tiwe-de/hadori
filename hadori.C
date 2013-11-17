@@ -40,11 +40,13 @@ namespace po = boost::program_options;
 
 // needed for equal_range and range-for
 namespace std {
-template<typename T> T& begin(pair<T,T> & ip) {
-	return ip.first;
+template<typename It>
+typename enable_if<is_base_of<input_iterator_tag, typename iterator_traits<It>::iterator_category>::value, It&>::type begin(pair<It,It> & p) {
+	return p.first;
 }
-template<typename T> T& end(pair<T,T> & ip) {
-	return ip.second;
+template<typename It>
+typename enable_if<is_base_of<input_iterator_tag, typename iterator_traits<It>::iterator_category>::value, It&>::type end(pair<It,It> & p) {
+	return p.second;
 }
 }
 
