@@ -20,6 +20,8 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+#include <boost/range/iterator_range.hpp>
+
 #include <string>
 #include <vector>
 #include <queue>
@@ -37,18 +39,6 @@ namespace po = boost::program_options;
 #include <sysexits.h>
 
 #include "version.h"
-
-// needed for equal_range and range-for
-namespace std {
-template<typename It>
-typename enable_if<is_base_of<input_iterator_tag, typename iterator_traits<It>::iterator_category>::value, It&>::type begin(pair<It,It> & p) {
-	return p.first;
-}
-template<typename It>
-typename enable_if<is_base_of<input_iterator_tag, typename iterator_traits<It>::iterator_category>::value, It&>::type end(pair<It,It> & p) {
-	return p.second;
-}
-}
 
 po::variables_map config;
 std::ostream debug(std::clog.rdbuf()), verbose(std::clog.rdbuf()), error(std::clog.rdbuf());
@@ -122,7 +112,7 @@ void handle_file(std::string const & path, struct stat const & s) {
 	}
 	inode f{path, s};
 	debug << f << " is new to us" << std::endl;
-	for (auto const & it : sizes.equal_range(s.st_size)) {
+	for (auto const & it : boost::make_iterator_range(sizes.equal_range(s.st_size))) {
 		inode const & candidate = kept.find(it.second)->second;
 		debug << "looking if it matches " << candidate << std::endl;
 		if (candidate.stat.st_mode != s.st_mode)
