@@ -76,17 +76,17 @@ void do_link (inode const & i, std::string const & other) {
 		exit(EX_UNAVAILABLE);
 	}
 	if (errno != EEXIST) {
-		char * errstring = strerror(errno);
+		char const * const errstring = strerror(errno);
 		error << "error linking " << i << " to " << other << ": " << errstring << ", nothing bad happened." << std::endl;
 		exit(EX_UNAVAILABLE);
 	}
 	if (unlink(other.c_str())) {
-		char * errstring = strerror(errno);
+		char const * const errstring = strerror(errno);
 		error << "error unlinking " << other << " before linking " << i << " to it: " << errstring << std::endl;
 		exit(EX_UNAVAILABLE);
 	}
 	if (link(i.filename.c_str(), other.c_str())) {
-		char * errstring = strerror(errno);
+		char const * const errstring = strerror(errno);
 		error << "error linking " << i << " to " << other << ": " << errstring << ", destination filename was already unlinked." << std::endl;
 		exit(EX_UNAVAILABLE);
 	}
@@ -94,8 +94,8 @@ void do_link (inode const & i, std::string const & other) {
 
 void handle_file(std::string const & path, struct stat const & s) {
 	static std::unordered_map<ino_t, inode const> kept;
-	static std::unordered_map<ino_t, ino_t> to_link;
-	static std::unordered_multimap<off_t, ino_t> sizes;
+	static std::unordered_map<ino_t, ino_t const> to_link;
+	static std::unordered_multimap<off_t, ino_t const> sizes;
 	
 	debug << "examining " << path << std::endl;
 	if (kept.count(s.st_ino)) {
@@ -110,7 +110,7 @@ void handle_file(std::string const & path, struct stat const & s) {
 			to_link.erase(s.st_ino);
 		return;
 	}
-	inode f{path, s};
+	inode const f{path, s};
 	debug << f << " is new to us" << std::endl;
 	for (auto const & it : boost::make_iterator_range(sizes.equal_range(s.st_size))) {
 		inode const & candidate = kept.find(it.second)->second;
@@ -145,7 +145,7 @@ void recurse (std::string const & dir, dev_t const dev) {
 	std::queue<std::string> subdirs;
 	
 	if (!(D = opendir(dir.c_str()))) {
-		char * errstring = strerror(errno);
+		char const * const errstring = strerror(errno);
 		error << "opendir(\"" << dir << "\"): " << errstring << std::endl;
 		return;
 	}
@@ -154,7 +154,7 @@ void recurse (std::string const & dir, dev_t const dev) {
 		path += '/';
 		path += d->d_name;
 		if (lstat(path.c_str(), &s)) {
-			char * errstring = strerror(errno);
+			char const * const errstring = strerror(errno);
 			error << "lstat(\"" << path << "\"): " << errstring << std::endl;
 			continue;
 		}
@@ -183,7 +183,7 @@ void recurse_start (std::string const & dir) {
 	struct stat s;
 
 	if (lstat(dir.c_str(), &s)) {
-		char * errstring = strerror(errno);
+		char const * const errstring = strerror(errno);
 		error << "lstat(\"" << dir << "\"): " << errstring << std::endl;
 		exit(EX_NOINPUT);
 	}
@@ -200,7 +200,7 @@ void recurse_start (std::string const & dir) {
 		handle_file(dir, s);
 }
 
-int main (int const argc, char ** argv) {
+int main (int const argc, char const * const * const argv) {
 	po::options_description opts("OPTIONS");
 	opts.add_options()
 		("help,h",	"print this help message")
@@ -249,9 +249,7 @@ int main (int const argc, char ** argv) {
 	} else {
 		if (not config.count("stdin") and not config.count("null"))
 			error << "no arguments supplied, assuming --stdin." << std::endl;
-		char delim = '\n';
-		if (config.count("null"))
-			delim = '\0';
+		char const delim = config.count("null") ? '\0' : '\n';
 		for (std::string dir; getline(std::cin, dir, delim);)
 			recurse_start(dir);
 	}
