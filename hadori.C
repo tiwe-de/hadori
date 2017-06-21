@@ -40,8 +40,8 @@ namespace po = boost::program_options;
 
 #include "version.h"
 
-po::variables_map config;
-std::ostream debug(std::clog.rdbuf()), verbose(std::clog.rdbuf()), error(std::clog.rdbuf());
+static po::variables_map config;
+static std::ostream debug(std::clog.rdbuf()), verbose(std::clog.rdbuf()), error(std::clog.rdbuf());
 
 struct inode {
 	std::string const filename;
@@ -59,7 +59,7 @@ inline bool compare (inode const & l, inode const & r) {
 		rf.read(rbuffer, sizeof(rbuffer));
 		if (lf.gcount() != rf.gcount())
 			return false;
-		if (memcmp(lbuffer, rbuffer, lf.gcount()))
+		if (memcmp(lbuffer, rbuffer, static_cast<size_t>(lf.gcount())))
 			return false;
 	}
 	return true;
@@ -70,7 +70,7 @@ inline std::ostream& operator<< (std::ostream& os, inode const & i) {
 	return os;
 }
 
-void do_link (inode const & i, std::string const & other) {
+static void do_link (inode const & i, std::string const & other) {
 	if (!link(i.filename.c_str(), other.c_str())) {
 		error << "linking " << i << " to " << other << " succeeded before unlinking (race condition)" << std::endl;
 		exit(EX_UNAVAILABLE);
@@ -92,7 +92,7 @@ void do_link (inode const & i, std::string const & other) {
 	}
 }
 
-void handle_file(std::string const & path, struct stat const & s) {
+static void handle_file (std::string const & path, struct stat const & s) {
 	static std::unordered_map<ino_t, inode const> kept;
 	static std::unordered_map<ino_t, ino_t const> to_link;
 	static std::unordered_multimap<off_t, ino_t const> sizes;
@@ -138,7 +138,7 @@ void handle_file(std::string const & path, struct stat const & s) {
 	sizes.insert({s.st_size, s.st_ino});
 }
 
-void recurse (std::string const & dir, dev_t const dev) {
+static void recurse (std::string const & dir, dev_t const dev) {
 	DIR* D;
 	struct dirent *d;
 	struct stat s;
@@ -179,7 +179,7 @@ void recurse (std::string const & dir, dev_t const dev) {
 	}
 }
 
-void recurse_start (std::string const & dir) {
+static void recurse_start (std::string const & dir) {
 	struct stat s;
 
 	if (lstat(dir.c_str(), &s)) {
